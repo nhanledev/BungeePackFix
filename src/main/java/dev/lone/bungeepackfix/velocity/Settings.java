@@ -7,16 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class Settings extends AbstractSettings<Component>
-{
-    public Settings(Path dataDirectory, InputStream defaultConfigStream) throws IOException
-    {
+public class Settings extends AbstractSettings<Component> {
+    public Settings(Path dataDirectory, InputStream defaultConfigStream) throws IOException {
         super(dataDirectory, defaultConfigStream);
     }
 
     @Override
-    protected void runPlatformDependentCode()
-    {
+    protected void runPlatformDependentCode() {
         ignored_pack_msg = SERIALIZER.deserialize(config.getString("messages.ignored_pack.message"));
     }
 }

@@ -13,51 +13,42 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class EventsListener implements Listener
-{
+public class EventsListener implements Listener {
     private final HashMap<UUID, PlayersPackCache> playersCache = new HashMap<>();
 
-    public void registerEvents()
-    {
+    public void registerEvents() {
         Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), this);
     }
 
-    public void registerBungeePackets()
-    {
+    public void registerBungeePackets() {
         ClientboundResourcePackPacket.register();
         Packets.registerHandler(ClientboundResourcePackPacket.class, (packet, conn) -> {
 
-            if(isIgnoredServer(conn))
+            if (isIgnoredServer(conn))
                 return false;
 
             PlayersPackCache cache = playersCache.get(conn.getUniqueId());
-            if(cache != null && cache.installedSuccessfully)
-            {
-                if(cache.isSamePack(
+            if (cache != null && cache.installedSuccessfully) {
+                if (cache.isSamePack(
                         packet,
                         conn,
                         Main.inst().settings
-                ))
-                {
-                    if(Main.inst().settings.log_ignored_respack)
+                )) {
+                    if (Main.inst().settings.log_ignored_respack)
                         Main.logger.log(Level.WARNING, "Ignored already sent pack: " + conn.getName() + " " + cache.cachedPacket);
-                    if(Main.inst().settings.ignored_pack_msg_enabled)
+                    if (Main.inst().settings.ignored_pack_msg_enabled)
                         conn.sendMessage(Main.inst().settings.ignored_pack_msg);
 
                     handleIgnoredPacket(conn);
                     return true;
-                }
-                else
-                {
+                } else {
                     playersCache.put(conn.getUniqueId(), new PlayersPackCache(packet));
                 }
-            }
-            else
-            {
+            } else {
                 playersCache.put(conn.getUniqueId(), new PlayersPackCache(packet));
             }
 
-            if(Main.inst().settings.log_sent_respack)
+            if (Main.inst().settings.log_sent_respack)
                 Main.logger.log(Level.WARNING, "Sending pack: " + conn.getName() + " " + packet);
 
             return false;
@@ -66,38 +57,34 @@ public class EventsListener implements Listener
         ServerboundResourcePackPacket.register();
         Packets.registerHandler(ServerboundResourcePackPacket.class, (packet, conn) -> {
 
-            if(isIgnoredServer(conn))
+            if (isIgnoredServer(conn))
                 return false;
 
-            if(Main.inst().settings.log_debug)
+            if (Main.inst().settings.log_debug)
                 Main.logger.log(Level.WARNING, "RespackStatusPacketIn: " + conn.getName() + " " + ServerboundResourcePackPacket.Status.values()[packet.status]);
 
-            if(packet.status == ServerboundResourcePackPacket.Status.SUCCESSFULLY_LOADED.ordinal())
-            {
+            if (packet.status == ServerboundResourcePackPacket.Status.SUCCESSFULLY_LOADED.ordinal()) {
                 PlayersPackCache cache = playersCache.get(conn.getUniqueId());
-                if(cache != null)
+                if (cache != null)
                     cache.installedSuccessfully = true;
-            }
-            else if(packet.status == ServerboundResourcePackPacket.Status.FAILED_DOWNLOAD.ordinal())
-            {
+            } else if (packet.status == ServerboundResourcePackPacket.Status.FAILED_DOWNLOAD.ordinal()) {
                 playersCache.remove(conn.getUniqueId());
             }
             return false;
         });
     }
 
-    private boolean isIgnoredServer(UserConnection conn)
-    {
+    private boolean isIgnoredServer(UserConnection conn) {
         return Main.inst().settings.isIgnoredServer(conn.getServer().getInfo().getName());
     }
 
     /**
      * Emulate the client behaviour to maintain compatibility with plugins that are waiting for the
      * Spigot "PlayerResourcePackStatusEvent"
+     *
      * @param conn Player connection.
      */
-    private void handleIgnoredPacket(UserConnection conn)
-    {
+    private void handleIgnoredPacket(UserConnection conn) {
         Packets.sendPacketToServer(
                 Main.inst(),
                 conn,
@@ -107,8 +94,7 @@ public class EventsListener implements Listener
     }
 
     @EventHandler
-    public void onPlayerDisconnect(PlayerDisconnectEvent e)
-    {
+    public void onPlayerDisconnect(PlayerDisconnectEvent e) {
         playersCache.remove(e.getPlayer().getUniqueId());
     }
 }

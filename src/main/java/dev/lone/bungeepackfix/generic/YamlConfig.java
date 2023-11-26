@@ -28,182 +28,133 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class YamlConfig
-{
+public class YamlConfig {
     private final Path file;
     private final AxiomConfiguration config = new AxiomConfiguration();
     private final AxiomConfiguration defaultConfig = new AxiomConfiguration();
 
-    public YamlConfig(Path file)
-    {
+    public YamlConfig(Path file) {
         this.file = file;
 
         Path parent = file.getParent();
-        if (!Files.exists(parent))
-        {
-            try
-            {
+        if (!Files.exists(parent)) {
+            try {
                 Files.createDirectories(parent);
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void loadConfig(InputStream is)
-    {
-        if (Files.exists(file))
-        {
-            try
-            {
+    public void loadConfig(InputStream is) {
+        if (Files.exists(file)) {
+            try {
                 load();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            try
-            {
+            try {
                 defaultConfig.load(is);
 
                 String beforeMerge = config.saveToString();
                 config.merge(defaultConfig, true, true, false);
 
-                if (!beforeMerge.equals(config.saveToString()))
-                {
+                if (!beforeMerge.equals(config.saveToString())) {
                     config.save(file);
                 }
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else
-        {
-            try
-            {
+        } else {
+            try {
                 defaultConfig.load(is);
                 defaultConfig.save(file);
                 load();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public Boolean getBoolean(String path)
-    {
+    public Boolean getBoolean(String path) {
         Boolean value = config.getBoolean(path);
 
-        if (value == null)
-        {
+        if (value == null) {
             return defaultConfig.getBoolean(path); // Nullable
-        }
-        else
-        {
+        } else {
             return value;
         }
     }
 
-    public Boolean getBoolean(String path, Boolean defValue)
-    {
+    public Boolean getBoolean(String path, Boolean defValue) {
         Boolean value = config.getBoolean(path);
         return value == null ? defValue : value;
     }
 
-    public Integer getInt(String path)
-    {
+    public Integer getInt(String path) {
         Integer value = null;
-        try
-        {
+        try {
             value = config.getInt(path);
-        }
-        catch (NumberFormatException ignored)
-        {
+        } catch (NumberFormatException ignored) {
             // todo: add logger
         }
         return value == null ? defaultConfig.getInt(path) : value;
     }
 
-    public Integer getInt(String path, Integer defValue)
-    {
+    public Integer getInt(String path, Integer defValue) {
         Integer value = null;
-        try
-        {
+        try {
             value = config.getInt(path);
-        }
-        catch (NumberFormatException ignored)
-        {
+        } catch (NumberFormatException ignored) {
             // todo: add logger
         }
         return value == null ? defValue : value;
     }
 
-    public String getString(String path)
-    {
+    public String getString(String path) {
         String value = config.getString(path);
 
-        if (value == null)
-        {
+        if (value == null) {
             return defaultConfig.getString(path); // Nullable
-        }
-        else
-        {
+        } else {
             return value;
         }
     }
 
-    public String getString(String path, String defValue)
-    {
+    public String getString(String path, String defValue) {
         String value = config.getString(path);
         return value == null ? defValue : value;
     }
 
-    public List<String> getStringList(String path)
-    {
+    public List<String> getStringList(String path) {
         List<String> value = config.getStringList(path);
 
-        if (value == null)
-        {
+        if (value == null) {
             return defaultConfig.getStringList(path); // Nullable
-        }
-        else
-        {
+        } else {
             return value;
         }
     }
 
-    public List<String> getStringList(String path, String whatToDelete)
-    {
+    public List<String> getStringList(String path, String whatToDelete) {
         return getStringList(path).stream()
                 .map(str -> str.replace(whatToDelete, "")).collect(Collectors.toList());
     }
 
-    public void load() throws IOException
-    {
+    public void load() throws IOException {
         config.load(file);
     }
 
-    public void save() throws IOException
-    {
+    public void save() throws IOException {
         config.save(file);
     }
 
-    public void set(String path, Object value)
-    {
-        try
-        {
+    public void set(String path, Object value) {
+        try {
             config.set(path, value);
             save();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

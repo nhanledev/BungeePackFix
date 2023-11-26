@@ -17,20 +17,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
-public class ClientboundResourcePackPacket extends ClientboundPacket
-{
-    public String url;
-    public String hash;
-    public boolean forced;
-    public String promptMessage;
-
+public class ClientboundResourcePackPacket extends ClientboundPacket {
     //<editor-fold desc="Reflection initialization stuff">
     private static final LinkedHashMap<Integer, Integer> PACKET_MAP;
-    static
-    {
+
+    static {
         PACKET_MAP = new LinkedHashMap<>();
-        try
-        {
+        try {
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_8, 0x48);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_9, 0x32);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_12, 0x34);
@@ -45,49 +38,47 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_19_3, 0x3C);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_19_4, 0x40);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_20_2, 0x42);
-        }
-        catch (Exception ignored)
-        {
+        } catch (Exception ignored) {
             // Failed to find constant, probably Bungeecord is outdated.
         }
     }
+
+    public String url;
+    public String hash;
+    public boolean forced;
+    public String promptMessage;
     //</editor-fold>
+
+    public ClientboundResourcePackPacket(final String url, final String hash) {
+        this.url = url;
+        this.hash = hash;
+    }
+
+    public ClientboundResourcePackPacket(final String url, final String hash, final boolean forced, final String promptMessage) {
+        this(url, hash);
+        this.forced = forced;
+        this.promptMessage = promptMessage;
+    }
+
+    public ClientboundResourcePackPacket() {
+    }
 
     /**
      * Utility method to register this packet
      */
-    public static void register()
-    {
+    public static void register() {
         Packets.registerPacket(
                 ClientboundResourcePackPacket::new,
                 PACKET_MAP
         );
     }
 
-    public ClientboundResourcePackPacket(final String url, final String hash)
-    {
-        this.url = url;
-        this.hash = hash;
-    }
-
-    public ClientboundResourcePackPacket(final String url, final String hash, final boolean forced, final String promptMessage)
-    {
-        this(url, hash);
-        this.forced = forced;
-        this.promptMessage = promptMessage;
-    }
-
-    public ClientboundResourcePackPacket() {}
-
     @Override
-    public void handle(final AbstractPacketHandler handler) throws Exception
-    {
+    public void handle(final AbstractPacketHandler handler) throws Exception {
         PacketWrapper wrapper = Packet.newPacketWrapper(this, Unpooled.EMPTY_BUFFER, Protocol.STATUS);
-        if (handler instanceof DownstreamBridge)
-        {
+        if (handler instanceof DownstreamBridge) {
             Packets.runHandlers(wrapper, Packets.getUserConnection((DownstreamBridge) handler));
-        }
-        else // Sending "resourcepack apply" packet to the server? wtf, should I warn about that?
+        } else // Sending "resourcepack apply" packet to the server? wtf, should I warn about that?
         {
             if (handler instanceof PacketHandler)
                 ((PacketHandler) handler).handle(wrapper);
@@ -95,25 +86,19 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
     }
 
     @Override
-    public void read(final ByteBuf buf)
-    {
+    public void read(final ByteBuf buf) {
         this.url = readString(buf);
-        try
-        {
+        try {
             this.hash = readString(buf);
-        }
-        catch (IndexOutOfBoundsException ignored)
-        {
+        } catch (IndexOutOfBoundsException ignored) {
             //null hash?
         }
     }
 
     @Override
-    public void read(final ByteBuf buf, final ProtocolConstants.Direction direction, final int clientVersion)
-    {
+    public void read(final ByteBuf buf, final ProtocolConstants.Direction direction, final int clientVersion) {
         read(buf);
-        if (clientVersion >= ProtocolConstants.MINECRAFT_1_17)
-        {
+        if (clientVersion >= ProtocolConstants.MINECRAFT_1_17) {
             forced = buf.readBoolean();
             final boolean hasPromptMessage = buf.readBoolean();
             if (hasPromptMessage)
@@ -122,34 +107,27 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
     }
 
     @Override
-    public void write(final ByteBuf buf)
-    {
+    public void write(final ByteBuf buf) {
         writeString(url, buf);
         writeString(hash == null ? "" : hash, buf);
     }
 
     @Override
-    public void write(final ByteBuf buf, final ProtocolConstants.Direction direction, final int clientVersion)
-    {
+    public void write(final ByteBuf buf, final ProtocolConstants.Direction direction, final int clientVersion) {
         this.write(buf);
-        if (clientVersion >= ProtocolConstants.MINECRAFT_1_17)
-        {
+        if (clientVersion >= ProtocolConstants.MINECRAFT_1_17) {
             buf.writeBoolean(this.forced);
-            if (this.promptMessage != null)
-            {
+            if (this.promptMessage != null) {
                 buf.writeBoolean(true);
                 writeString(this.promptMessage, buf);
-            }
-            else
-            {
+            } else {
                 buf.writeBoolean(false);
             }
         }
     }
 
     @Nullable
-    public String getUrlHashtag()
-    {
+    public String getUrlHashtag() {
         return PackUtility.getUrlHashtag(url);
     }
 
@@ -157,8 +135,7 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
                               boolean ignoreHashtagInUrl,
                               boolean checkHash,
                               boolean checkForced,
-                              boolean checkMsg)
-    {
+                              boolean checkMsg) {
         if (this == newPack)
             return true;
 
@@ -176,8 +153,7 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
     }
 
     @Override
-    public boolean equals(final Object o)
-    {
+    public boolean equals(final Object o) {
         if (this == o)
             return true;
 
@@ -193,14 +169,12 @@ public class ClientboundResourcePackPacket extends ClientboundPacket
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(this.url, this.hash, this.forced, this.promptMessage);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "ClientboundResourcePackPacket{url='" + this.url + '\'' + ", hash=" + this.hash + ", forced=" + this.forced + ", promptMessage=" + this.promptMessage + '}';
     }
 }

@@ -9,30 +9,24 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.logging.Logger;
 
-public final class Main extends Plugin implements Listener
-{
+public final class Main extends Plugin implements Listener {
     public static Logger logger;
-    private BungeeAudiences adventure;
-    public Settings settings;
     private static Main instance;
+    public Settings settings;
+    private BungeeAudiences adventure;
 
-    public static Main inst()
-    {
+    public static Main inst() {
         return instance;
     }
 
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         instance = this;
         logger = this.getLogger();
         adventure = BungeeAudiences.create(this);
-        try
-        {
+        try {
             settings = new Settings(this.getDataFolder().toPath(), getResourceAsStream("config.yml"));
-        }
-        catch (Throwable ex)
-        {
+        } catch (Throwable ex) {
             logger.severe("Failed to load settings.");
             ex.printStackTrace();
             logger.severe("Disabling plugin.");
@@ -51,21 +45,17 @@ public final class Main extends Plugin implements Listener
     }
 
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         logger = null;
-        if (this.adventure != null)
-        {
+        if (this.adventure != null) {
             this.adventure.close();
             this.adventure = null;
         }
     }
 
     @NonNull
-    public BungeeAudiences adventure()
-    {
-        if (this.adventure == null)
-        {
+    public BungeeAudiences adventure() {
+        if (this.adventure == null) {
             throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
         }
         return this.adventure;

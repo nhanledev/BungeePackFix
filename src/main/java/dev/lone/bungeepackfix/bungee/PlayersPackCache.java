@@ -4,27 +4,21 @@ import dev.lone.bungeepackfix.bungee.packets.impl.ClientboundResourcePackPacket;
 import dev.lone.bungeepackfix.generic.AbstractPlayersPackCache;
 import net.md_5.bungee.UserConnection;
 
-public class PlayersPackCache extends AbstractPlayersPackCache
-{
+public class PlayersPackCache extends AbstractPlayersPackCache {
     public ClientboundResourcePackPacket cachedPacket;
     public boolean installedSuccessfully;
 
-    public PlayersPackCache(ClientboundResourcePackPacket cachedPacket)
-    {
+    public PlayersPackCache(ClientboundResourcePackPacket cachedPacket) {
         this.cachedPacket = cachedPacket;
     }
 
-    public boolean isSamePack(ClientboundResourcePackPacket packet, UserConnection conn, Settings settings)
-    {
+    public boolean isSamePack(ClientboundResourcePackPacket packet, UserConnection conn, Settings settings) {
         // Check if the main server URL changed
-        if (conn.getServer().getInfo().getName().equals(settings.main_server_name))
-        {
+        if (conn.getServer().getInfo().getName().equals(settings.main_server_name)) {
             String urlHashtag = packet.getUrlHashtag();
-            if(mainServerUrlHashtag != null)
-            {
+            if (mainServerUrlHashtag != null) {
                 // Check if the hashtag in main server URL changed
-                if(!mainServerUrlHashtag.equals(urlHashtag))
-                {
+                if (!mainServerUrlHashtag.equals(urlHashtag)) {
                     mainServerUrlHashtag = urlHashtag;
                     return false;
                 }

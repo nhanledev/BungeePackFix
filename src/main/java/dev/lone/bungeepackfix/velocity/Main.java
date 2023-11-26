@@ -19,48 +19,39 @@ import java.util.concurrent.TimeUnit;
         version = "1.1.4",
         description = "Avoid sending resourcepacks again if it's the same resourcepack. Useful when you switch servers.", authors = {"LoneDev", "YoSoyVillaa"}
 )
-public class Main
-{
+public class Main {
     private final Path dataDirectory;
     private final Logger logger;
     private final ProxyServer proxy;
     public Settings settings;
 
     @Inject
-    public Main(ProxyServer proxy, @DataDirectory Path dataDirectory, Logger logger)
-    {
+    public Main(ProxyServer proxy, @DataDirectory Path dataDirectory, Logger logger) {
         this.proxy = proxy;
         this.dataDirectory = dataDirectory;
         this.logger = logger;
     }
 
-    public Logger getLogger()
-    {
+    public Logger getLogger() {
         return logger;
     }
 
-    public ProxyServer getProxy()
-    {
+    public ProxyServer getProxy() {
         return proxy;
     }
 
-    public void runDelayedTask(Runnable runnable, long delayMs)
-    {
+    public void runDelayedTask(Runnable runnable, long delayMs) {
         getProxy().getScheduler().buildTask(this, runnable)
                 .delay(delayMs, TimeUnit.MILLISECONDS)
                 .schedule();
     }
 
     @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent e)
-    {
-        try
-        {
+    public void onProxyInitialization(ProxyInitializeEvent e) {
+        try {
             this.settings = new Settings(dataDirectory, getClass().getClassLoader().getResourceAsStream("config.yml"));
             proxy.getEventManager().register(this, new EventsListener(this));
-        }
-        catch (Throwable ex)
-        {
+        } catch (Throwable ex) {
             ex.printStackTrace();
             logger.error("Disabling plugin.");
             return;
@@ -70,8 +61,7 @@ public class Main
     }
 
     @Subscribe(order = PostOrder.NORMAL)
-    public void onPlayerDisconnect(DisconnectEvent e)
-    {
+    public void onPlayerDisconnect(DisconnectEvent e) {
         PlayersPackCache.playersCache.remove(e.getPlayer().getUniqueId());
     }
 }

@@ -9,8 +9,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayersPackCache extends AbstractPlayersPackCache
-{
+public class PlayersPackCache extends AbstractPlayersPackCache {
     public static HashMap<UUID, PlayersPackCache> playersCache = new HashMap<>();
 
     public static boolean isSamePack(Settings settings,
@@ -20,29 +19,23 @@ public class PlayersPackCache extends AbstractPlayersPackCache
                                      boolean ignoreHashtagInUrl,
                                      boolean checkHash,
                                      boolean checkForced,
-                                     boolean checkMsg)
-    {
+                                     boolean checkMsg) {
         if (playerPack == newPack)
             return true;
 
         if (newPack == null)
             return false;
 
-        if (connection.getServerInfo().getName().equals(settings.main_server_name))
-        {
+        if (connection.getServerInfo().getName().equals(settings.main_server_name)) {
             String urlHashtag = PackUtility.getUrlHashtag(newPack.getUrl());
             PlayersPackCache playerCache = playersCache.get(connection.getPlayer().getUniqueId());
-            if (playerCache != null)
-            {
+            if (playerCache != null) {
                 // Check if the hashtag in main server URL changed
-                if (!Objects.equals(playerCache.mainServerUrlHashtag, urlHashtag))
-                {
+                if (!Objects.equals(playerCache.mainServerUrlHashtag, urlHashtag)) {
                     playerCache.mainServerUrlHashtag = urlHashtag;
                     return false;
                 }
-            }
-            else
-            {
+            } else {
                 playerCache = new PlayersPackCache();
                 playersCache.put(connection.getPlayer().getUniqueId(), playerCache);
             }

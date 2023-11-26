@@ -8,34 +8,26 @@ import net.md_5.bungee.protocol.Protocol;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Packet extends DefinedPacket
-{
+public abstract class Packet extends DefinedPacket {
     static Constructor<PacketWrapper> legacyConstructor;
-    static
-    {
-        try
-        {
+
+    static {
+        try {
             //noinspection JavaReflectionMemberAccess
             legacyConstructor = PacketWrapper.class.getConstructor(DefinedPacket.class, ByteBuf.class);
+        } catch (NoSuchMethodException ignored) {
         }
-        catch (NoSuchMethodException ignored) { }
     }
 
-    public static PacketWrapper newPacketWrapper(DefinedPacket packet, ByteBuf buf, Protocol protocol)
-    {
+    public static PacketWrapper newPacketWrapper(DefinedPacket packet, ByteBuf buf, Protocol protocol) {
         PacketWrapper wrapper;
-        if(legacyConstructor != null)
-        {
-            try
-            {
+        if (legacyConstructor != null) {
+            try {
                 wrapper = legacyConstructor.newInstance(packet, buf);
-            }
-            catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
-            {
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else
+        } else
             wrapper = new PacketWrapper(packet, buf, protocol);
         return wrapper;
     }

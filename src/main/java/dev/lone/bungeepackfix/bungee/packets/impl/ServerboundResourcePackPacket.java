@@ -1,5 +1,3 @@
-
-
 package dev.lone.bungeepackfix.bungee.packets.impl;
 
 import dev.lone.bungeepackfix.bungee.packets.Packet;
@@ -17,17 +15,13 @@ import net.md_5.bungee.protocol.ProtocolConstants;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
-public class ServerboundResourcePackPacket extends ServerboundPacket
-{
-    public int status;
-
+public class ServerboundResourcePackPacket extends ServerboundPacket {
     //<editor-fold desc="Reflection initialization stuff">
     private static final LinkedHashMap<Integer, Integer> PACKET_MAP;
-    static
-    {
+
+    static {
         PACKET_MAP = new LinkedHashMap<>();
-        try
-        {
+        try {
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_8, 0x19);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_9, 0x16);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_12, 0x18);
@@ -37,46 +31,41 @@ public class ServerboundResourcePackPacket extends ServerboundPacket
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_19, 0x23);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_19_1, 0x24);
             PACKET_MAP.put(ProtocolConstants.MINECRAFT_1_20_2, 0x27);
-        }
-        catch (Exception ignored)
-        {
+        } catch (Exception ignored) {
             // Failed to find constant, probably Bungeecord is outdated.
         }
     }
+
+    public int status;
     //</editor-fold>
+
+    public ServerboundResourcePackPacket(int status) {
+        this.status = status;
+    }
+
+    public ServerboundResourcePackPacket() {
+    }
+
+    public ServerboundResourcePackPacket(Status status) {
+        this.status = status.ordinal();
+    }
 
     /**
      * Utility method to register this packet
      */
-    public static void register()
-    {
+    public static void register() {
         Packets.registerPacket(
                 ServerboundResourcePackPacket::new,
                 PACKET_MAP
         );
     }
 
-    public ServerboundResourcePackPacket(int status)
-    {
-        this.status = status;
-    }
-
-    public ServerboundResourcePackPacket() {}
-
-    public ServerboundResourcePackPacket(Status status)
-    {
-        this.status = status.ordinal();
-    }
-
     @Override
-    public void handle(final AbstractPacketHandler handler) throws Exception
-    {
+    public void handle(final AbstractPacketHandler handler) throws Exception {
         PacketWrapper wrapper = Packet.newPacketWrapper(this, Unpooled.EMPTY_BUFFER, Protocol.STATUS);
-        if (handler instanceof UpstreamBridge)
-        {
+        if (handler instanceof UpstreamBridge) {
             Packets.runHandlers(wrapper, Packets.getUserConnection((UpstreamBridge) handler));
-        }
-        else //sending this packet to the client? wtf
+        } else //sending this packet to the client? wtf
         {
             if (handler instanceof PacketHandler)
                 ((PacketHandler) handler).handle(wrapper);
@@ -84,32 +73,27 @@ public class ServerboundResourcePackPacket extends ServerboundPacket
     }
 
     @Override
-    public void read(final ByteBuf buf)
-    {
+    public void read(final ByteBuf buf) {
         this.status = readVarInt(buf);
     }
 
     @Override
-    public void read(final ByteBuf buf, final ProtocolConstants.Direction direction, final int ProtocolConstants)
-    {
+    public void read(final ByteBuf buf, final ProtocolConstants.Direction direction, final int ProtocolConstants) {
         this.status = readVarInt(buf);
     }
 
     @Override
-    public void write(final ByteBuf buf)
-    {
+    public void write(final ByteBuf buf) {
         writeVarInt(status, buf);
     }
 
     @Override
-    public void write(final ByteBuf buf, final ProtocolConstants.Direction direction, final int ProtocolConstants)
-    {
+    public void write(final ByteBuf buf, final ProtocolConstants.Direction direction, final int ProtocolConstants) {
         writeVarInt(status, buf);
     }
 
     @Override
-    public boolean equals(final Object o)
-    {
+    public boolean equals(final Object o) {
         if (this == o)
             return true;
 
@@ -121,19 +105,16 @@ public class ServerboundResourcePackPacket extends ServerboundPacket
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(this.status);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "ServerboundResourcePackPacket{status=" + Status.values()[this.status] + "}";
     }
 
-    public enum Status
-    {
+    public enum Status {
         SUCCESSFULLY_LOADED,
         DECLINED,
         FAILED_DOWNLOAD,

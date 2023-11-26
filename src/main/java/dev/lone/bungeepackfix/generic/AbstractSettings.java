@@ -11,34 +11,25 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 
-public abstract class AbstractSettings<T>
-{
-    protected ComponentSerializer<Component, ?, String> SERIALIZER;
-
+public abstract class AbstractSettings<T> {
     public boolean equal_pack_attributes_hash;
     public boolean equal_pack_attributes_forced;
     public boolean equal_pack_attributes_prompt_message;
-
     public boolean ignore_hash_in_url;
     public String main_server_name;
-
     public boolean ignored_servers_enabled;
     public boolean ignored_servers_invert_check;
     public List<String> ignored_servers;
-
     public boolean log_debug;
     public boolean log_ignored_respack;
     public boolean log_sent_respack;
     public boolean ignored_pack_msg_enabled;
-
     public boolean minimessage_support;
-
     public T ignored_pack_msg;
-
+    protected ComponentSerializer<Component, ?, String> SERIALIZER;
     protected YamlConfig config;
 
-    public AbstractSettings(Path dataDirectory, InputStream defaultConfigStream) throws IOException
-    {
+    public AbstractSettings(Path dataDirectory, InputStream defaultConfigStream) throws IOException {
         config = new YamlConfig(new File(dataDirectory.toFile(), "config.yml").toPath());
         config.loadConfig(defaultConfigStream);
 
@@ -60,7 +51,7 @@ public abstract class AbstractSettings<T>
 
         minimessage_support = config.getBoolean("messages.minimessage_support", false);
 
-        if(minimessage_support)
+        if (minimessage_support)
             SERIALIZER = MiniMessage.miniMessage();
         else
             SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
@@ -70,11 +61,10 @@ public abstract class AbstractSettings<T>
 
     protected abstract void runPlatformDependentCode();
 
-    public boolean isIgnoredServer(String name)
-    {
-        if(!ignored_servers_enabled)
+    public boolean isIgnoredServer(String name) {
+        if (!ignored_servers_enabled)
             return false;
-        if(ignored_servers_invert_check)
+        if (ignored_servers_invert_check)
             return !(ignored_servers.contains(name));
         return (ignored_servers.contains(name));
     }
